@@ -18,6 +18,7 @@ const User = new Schema({
     timestamps: true
 })
 
+
 User.methods.generateAuthToken = async function () {
     const user = this;
     const token = jwt.sign({ _id: user._id, email: user.email }, keySecret);
