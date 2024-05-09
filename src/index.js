@@ -10,13 +10,18 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import IpAddress from "./utils/ipAddress.js";
 
+import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
+import dotenv from 'dotenv';
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
 const port = 3000;
 const server = http.createServer(app);
 const io = new Server(server);
-
+const s3Client = new S3Client({
+    region: 'Asia Pacific (Sydney) ap-southeast-2'
+})
 // Template engine
 
 // Static files
@@ -41,7 +46,6 @@ io.on('connection', (socket) => {
 server.listen(port, IpAddress, () => {
     console.log(`Vstagram is listening at http://${ipAddress}:${port}`);
 });
-
 // Socket.io server
 const socketPort = 8080;
 const socketServer = http.createServer();
