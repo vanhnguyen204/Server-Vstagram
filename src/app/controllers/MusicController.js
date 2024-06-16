@@ -42,13 +42,27 @@ export const MusicController = {
             next(err)
         }
     },
-    async getAllMusic(req, res, next) {
-        const musicReponse = await MusicModel.find({});
+    async getMusics(req, res, next) {
+        try {
+            const limit = parseInt(req.query.limit) || 1;
+            const page = parseInt(req.query.page) || 1;
+            console.log(limit, page);
+            const musicReponse = await MusicModel.paginate({}, { limit: limit, page: page });
 
-        if (musicReponse.length !== 0) {
-            res.status(200).json(musicReponse)
-        } else {
-            res.json({ data: [], message: 'Music is empty!' })
+            if (musicReponse.docs.length !== 0) {
+                res.status(200).json({
+                    data: musicReponse.docs,
+                    total: musicReponse.total,
+                    limit,
+                    page,
+                    nextPage: musicReponse.nextPage,
+                    prevPage: musicReponse.prevPage,
+                });
+            } else {
+                res.json({ data: [], message: 'Music is empty!' })
+            }
+        } catch (error) {
+            next(error)
         }
 
     }

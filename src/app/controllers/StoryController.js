@@ -24,9 +24,8 @@ const StoryController = {
       if (!verify) {
         return res.status(404).json({ message: 'Can not verify this token' });
       }
-      console.log(verify);
-      const resultImages = await s3UploadMultipleImage(req.files);
-      console.log(resultImages);
+      const resultImages = await s3UploadMultipleImage(req.files, 'stories');
+  
       const story = new StoryModel();
       story.userId = verify._id;
       story.imageStory = resultImages[0];

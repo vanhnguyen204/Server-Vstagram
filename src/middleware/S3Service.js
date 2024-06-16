@@ -50,7 +50,7 @@ export const s3Uploadv3Image = async (file) => {
   }
 };
 
-export const s3UploadMultipleImage = async (files) => {
+export const s3UploadMultipleImage = async (files, folderName) => {
   const s3client = new S3Client({ region: 'ap-southeast-2' });
 
   const uploadResults = await Promise.all(
@@ -58,7 +58,7 @@ export const s3UploadMultipleImage = async (files) => {
       const fileData = fs.readFileSync(file.path);
       const params = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `${uuidv4()}-${file.originalname}`,
+        Key: `${folderName}/${uuidv4()}-${file.originalname}`,
         Body: fileData,
         ContentType: file.mimetype,
       };

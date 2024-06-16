@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import paginate from "mongoose-paginate-v2";
 const Schema = mongoose.Schema;
 
 const Music = new Schema({
@@ -11,6 +12,7 @@ const Music = new Schema({
     timestamps: true
 })
 
+Music.plugin(paginate)
 const MusicModel = mongoose.model('Music', Music, 'Music');
 
 export default MusicModel;

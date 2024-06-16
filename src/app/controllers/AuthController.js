@@ -1,3 +1,4 @@
+import email from '../../constants/infor.js';
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
 const AuthController = {
@@ -7,9 +8,10 @@ const AuthController = {
         try {
             const verificationCode = Math.floor(100000 + Math.random() * 900000);
             const existingUser = await User.findOne({ email: req.body.email });
+            console.log(existingUser);
             if (existingUser) {
-                res.status(400).json({ message: 'Tài khoản đã tồn tại!' });
-                return;
+                return res.status(400).json({ status: 'failed', message: 'Tài khoản đã tồn tại!', code: 400 });
+
             }
             const user = new User({
                 email: req.body.email,
@@ -17,16 +19,21 @@ const AuthController = {
             });
 
             await user.save();
-            console.log('Creating account!');
 
             await user.sendVerificationEmail(verificationCode);
 
-            res.status(201).json({
-                message: 'Email hợp lệ, vui lòng kiểm tra email của bạn để lấy mã xác nhận!'
+            return res.status(201).json({
+                status: 'success',
+                message: 'Email hợp lệ, vui lòng kiểm tra email của bạn để lấy mã xác nhận!',
+                code: 201
             });
         } catch (error) {
             console.error('Error registering user:', error);
-            res.status(400).json(error);
+            res.status(400).json({
+                status: 'failed',
+                message: 'Email không hợp lệ, vui lòng kiểm tra email của bạn để lấy mã xác nhận!',
+                code: 201
+            });
             next(error);
         }
     },
@@ -40,9 +47,9 @@ const AuthController = {
                 .then(data => {
                     if (data) {
                         console.log('verify success!');
-                        res.status(200).json({ message: 'Chuyển đến màn hình nhập mật khẩu!', status: 200 });
+                        res.status(200).json({ status: 'success', message: 'Chuyển đến màn hình nhập mật khẩu!', code: 200 });
                     } else {
-                        res.status(404).json({ message: 'Mã xác nhận không đúng!', status: 404 });
+                        res.status(404).json({ message: 'Mã xác nhận không đúng!', status: 'failed', code: 404 });
                     }
                 })
         } catch (error) {
@@ -61,10 +68,8 @@ const AuthController = {
 
             const newUser = await existingUser.save();
             await newUser.generateAuthToken();
-            res.status(201).json({ message: 'Create account successfully' });
-            if (newUser) {
-                console.log('create account successfully');
-            }
+            return res.status(201).json({ message: 'Create account successfully' });
+
         } catch (error) {
             next(error);
         }
@@ -81,9 +86,28 @@ const AuthController = {
             const token = await result.generateAuthToken();
             result.passWord = '';
             result.token = token;
-            res.status(200).json(result);
+            res.status(200).json({
+                email: response.email,
+                fullName: response.fullName,
+                avatar: response.avatar,
+                token: token
+            });
         } catch (error) {
             next(error);
+        }
+    },
+    async getUserInformation(req, res, next) {
+        try {
+            const { _id } = req.body.user;
+            const response = await User.findOne({ _id: _id })
+
+            return res.status(200).json({
+                email: response.email,
+                fullName: response.fullName,
+                avatar: response.avatar,
+            })
+        } catch (error) {
+            next(error)
         }
     }
 
