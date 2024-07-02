@@ -17,30 +17,44 @@ const StoryController = {
   // },
   async createStory(req, res, next) {
     console.log('Create story');
-    const { audioMedia, type, timePlay, accessToken } = req.body;
+    const { music, type, duration } = req.body;
+    const { _id } = req.body.user;
     console.log(req.body);
     try {
-      const verify = await verifyToken(accessToken);
-      if (!verify) {
-        return res.status(404).json({ message: 'Can not verify this token' });
-      }
-      const resultImages = await s3UploadMultipleImage(req.files, 'stories');
-  
-      const story = new StoryModel();
-      story.userId = verify._id;
-      story.imageStory = resultImages[0];
-      story.backgroundStory = resultImages[1];
-      story.audioStory = audioMedia;
-      story.type = type;
-      story.timePlay = timePlay;
+      console.log(req.files);
 
-      const storyResponse = await story.save();
-      if (!storyResponse) {
-        return res.status(500).json({message: 'Can not create story'})
-      }
-      return res.status(201).json({ data: story, message: 'Create story success!' });
+      const resultImages = await s3UploadMultipleImage(req.files, 'stories');
+      const now = new Date();
+      const timeNowFormatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+      const story = new StoryModel();
+      story.userId = _id;
+      story.image = resultImages[0];
+      story.music = music;
+      story.type = type;
+      story.duration = duration;
+      story.timeCreated = timeNowFormatted;
+
+      await story.save();
+      return res.status(201).json({ message: 'Create story success!', status: 'success', code: 201 });
     } catch (error) {
-      return res.status(500).json({ message: 'ERROR when create story' });
+      res.status(500).json({ message: 'ERROR when create story', status: 'failed', code: 500 });
+      next(error)
+    }
+  },
+  async getStories(req, res, next) {
+    console.log('Get my stories');
+    try {
+      const { _id } = req.body.user
+      const response = await StoryModel.find({ userId: _id })
+    
+      if (response.length === 0) {
+        return res.status(200).json([])
+      }else{
+        return res.status(200).json(response)
+      }
+    } catch (error) {
+      next(error)
     }
   }
 

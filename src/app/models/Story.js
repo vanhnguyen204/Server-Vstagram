@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 
 const Story = new Schema({
     userId: {type: String, default: ''},
-    imageStory: {type: String, default: ''},
-    backgroundStory: {type: String, default: ''},
-    audioStory:{type: String, default: ''},
+    image: {type: String, default: ''},
+    video: {type: String, default: ''},
+    music:{type: String, default: ''},
     type: {type: String, default: ''},
-    timePlay: {type: Number, default: 15},
-    isExpiry: {type: Boolean, default: false}
+    duration: {type: Number, default: 15},
+    timeCreated: {type: String, default: ''}
 
 }, {
     timestamps: true

@@ -8,6 +8,11 @@ export const MusicController = {
         console.log('Create music!');
         console.log(req.body)
         try {
+            const {
+                title,
+                artist,
+            } = req.body
+
             const filterAudioMusic = req.files.filter((item) => {
                 const index = item.mimetype.indexOf('/');
                 const subTypeAudio = item.mimetype.substring(0, index);
@@ -21,13 +26,6 @@ export const MusicController = {
             })
             console.log(filterImageMusic);
 
-
-            const {
-                title,
-                artist,
-            } = req.body
-
-
             const results = await s3Uploadv3(filterAudioMusic);
             const resultsImgAwsS3 = await s3Uploadv3Image(filterImageMusic[0]);
             const music = new MusicModel();
@@ -40,13 +38,14 @@ export const MusicController = {
         } catch (err) {
             console.log(err);
             next(err)
-        }
+        } 
     },
     async getMusics(req, res, next) {
         try {
             const limit = parseInt(req.query.limit) || 1;
             const page = parseInt(req.query.page) || 1;
-            console.log(limit, page);
+            console.log('Get musics')
+            console.log('Page: ', page, ' Limit: ', limit)
             const musicReponse = await MusicModel.paginate({}, { limit: limit, page: page });
 
             if (musicReponse.docs.length !== 0) {
@@ -64,6 +63,5 @@ export const MusicController = {
         } catch (error) {
             next(error)
         }
-
     }
 }

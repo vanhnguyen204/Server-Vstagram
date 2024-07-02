@@ -87,9 +87,9 @@ const AuthController = {
             result.passWord = '';
             result.token = token;
             res.status(200).json({
-                email: response.email,
-                fullName: response.fullName,
-                avatar: response.avatar,
+                email: result.email,
+                fullName: result.fullName,
+                avatar: result.avatar,
                 token: token
             });
         } catch (error) {
