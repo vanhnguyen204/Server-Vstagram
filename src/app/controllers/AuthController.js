@@ -87,6 +87,7 @@ const AuthController = {
             result.passWord = '';
             result.token = token;
             res.status(200).json({
+                _id: result._id.toString(),
                 email: result.email,
                 fullName: result.fullName,
                 avatar: result.avatar,
@@ -102,10 +103,35 @@ const AuthController = {
             const response = await User.findOne({ _id: _id })
 
             return res.status(200).json({
+                _id: _id,
                 email: response.email,
                 fullName: response.fullName,
                 avatar: response.avatar,
             })
+        } catch (error) {
+            next(error)
+        }
+    },
+    async activeActivity(req, res, next) {
+        try {
+            const { _id } = req.body.user;
+            await User.updateOne({ _id: _id }, { activity: req.query.activity })
+            return res.status(200).json({ message: 'Update activity success!', code: 200, status: 'success' })
+        } catch (error) {
+            next(error)
+        }
+    },
+    async getAllUser(req, res, next) {
+        try {
+            const response = await User.find({})
+            const filter = response.map(item => {
+                return {
+                    _id: item._id.toString(),
+                    name: item.fullName,
+                    avatar: item.avatar
+                }
+            })
+            return res.status(200).json(filter)
         } catch (error) {
             next(error)
         }

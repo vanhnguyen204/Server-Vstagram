@@ -12,13 +12,14 @@ import IpAddress from "./utils/ipAddress.js";
 
 import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
 import dotenv from 'dotenv';
+import setupSocket from './sockets/chat.socket.js';
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
 const port = 3000;
 const server = http.createServer(app);
-const io = new Server(server);
+
 const s3Client = new S3Client({
     region: 'Asia Pacific (Sydney) ap-southeast-2'
 })
@@ -37,20 +38,15 @@ routes(app);
 // Database connection
 connect();
 
-// Socket.io
-io.on('connection', (socket) => {
-    console.log('A user connected');
-});
-
 // Start the server
 server.listen(port, IpAddress, () => {
     console.log(`Vstagram is listening at http://${ipAddress}:${port}`);
 });
 // Socket.io server
 const socketPort = 8080;
-const socketServer = http.createServer();
+const socketServer = http.createServer(app);
 const socketIo = new Server(socketServer);
-
+setupSocket(socketIo)
 socketServer.listen(socketPort, () => {
     console.log(`Socket io is listening at port ${socketPort}!`);
 });

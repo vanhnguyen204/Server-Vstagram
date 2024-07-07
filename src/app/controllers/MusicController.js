@@ -44,8 +44,8 @@ export const MusicController = {
         try {
             const limit = parseInt(req.query.limit) || 1;
             const page = parseInt(req.query.page) || 1;
-            console.log('Get musics')
-            console.log('Page: ', page, ' Limit: ', limit)
+            // console.log('Get musics')
+            // console.log('Page: ', page, ' Limit: ', limit)
             const musicReponse = await MusicModel.paginate({}, { limit: limit, page: page });
 
             if (musicReponse.docs.length !== 0) {

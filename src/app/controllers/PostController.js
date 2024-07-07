@@ -1,5 +1,7 @@
+
 import { s3UploadMultipleImage } from '../../middleware/S3Service.js'
 import PostModel from "../models/Post.js";
+import UserModel from '../models/User.js';
 
 class PostController {
 
@@ -40,13 +42,37 @@ class PostController {
         try {
             const limit = parseInt(req.query.limit) || 5;
             const page = parseInt(req.query.page) || 1;
-            console.log('Get post')
-            console.log('Page: ', page, ' Limit: ', limit)
-            const postResponse = await PostModel.paginate({}, { limit: limit, page: page });
 
-            if (postResponse.docs.length !== 0) {
+            // console.log('Get post');
+            // console.log('Page:', page, 'Limit:', limit);
+
+            const postResponse = await PostModel.paginate({}, { limit, page });
+
+            const dataResponse = await Promise.all(postResponse.docs.map(async item => {
+                try {
+                    const user = await UserModel.findOne({ _id: item.userId });
+                    return {
+                        ...item.toObject(),
+                        name: user.fullName,
+                        avatar: user.avatar,
+                        postType: {
+                            type: item.type,
+                            images: item.images
+                        }
+                    };
+                    
+                } catch (error) {
+                    console.error(`Error fetching user data for userId ${item.userId}:`, error);
+                    return {
+                        ...item.toObject(),
+                        userName: null,
+                        avatar: null
+                    };
+                }
+            }));
+            if (dataResponse.length !== 0) {
                 res.status(200).json({
-                    data: postResponse.docs,
+                    data: dataResponse,
                     total: postResponse.total,
                     limit,
                     page,
@@ -54,10 +80,10 @@ class PostController {
                     prevPage: postResponse.prevPage,
                 });
             } else {
-                res.json({ data: []})
+                res.status(200).json({ data: [] });
             }
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 }

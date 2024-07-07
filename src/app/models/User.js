@@ -12,6 +12,7 @@ const User = new Schema({
     fullName: { type: String, default: '' },
     avatar: { type: String, default: '' },
     token: { type: String, default: '' },
+    activity: { type: String, default: '' },
     codeRegister: { type: Number, default: 0 }
 
 }, {
