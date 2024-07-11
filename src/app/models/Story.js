@@ -5,7 +5,7 @@ const Story = new Schema({
     userId: {type: String, default: ''},
     image: {type: String, default: ''},
     video: {type: String, default: ''},
-    music:{type: String, default: ''},
+    musicId:{type: String, default: ''},
     type: {type: String, default: ''},
     duration: {type: Number, default: 15},
     timeCreated: {type: String, default: ''}

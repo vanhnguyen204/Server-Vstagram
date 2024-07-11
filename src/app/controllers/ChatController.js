@@ -6,18 +6,16 @@ class ChatController {
         try {
             const limit = parseInt(req.query.limit) || 20;
             const page = parseInt(req.query.page) || 1;
-            const {userIdSent, userIdReceived} = req.query;
+            const { userIdSent, userIdReceived } = req.query;
             const conversations = await ChatModel.paginate({
                 $or: [
                     { userIdSent: userIdSent, userIdReceived: userIdReceived },
                     { userIdSent: userIdReceived, userIdReceived: userIdSent }
                 ]
-            }, { limit: limit, page: page });
+            }, { limit: limit, page: page, sort: { timeChat: -1 } });
             const data = {
-            
+
                 data: conversations.docs,
-                totalDocs: conversations.totalDocs,
-                totalPages: conversations.totalPages,
                 limit,
                 page,
                 nextPage: conversations.nextPage,
@@ -94,7 +92,7 @@ class ChatController {
         }
     }
 
-    async sendMessage(io, data, recipientSocketId) {
+    async sendMessage(io, data, recipientSocketId, userIdSent) {
         try {
             const now = new Date();
             const timeNowFormatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
@@ -106,7 +104,7 @@ class ChatController {
                 timeChat: timeNowFormatted,
             });
             await newChat.save()
-            io.to(recipientSocketId).emit('newMessage', newChat);
+            io.to([recipientSocketId, userIdSent]).emit('newMessage', newChat);
         } catch (error) {
             console.log(error)
         }

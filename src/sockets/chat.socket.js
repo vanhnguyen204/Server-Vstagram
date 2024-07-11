@@ -31,9 +31,10 @@ const setupSocket = async (io) => {
             })
             socket.on('sendMessage', async (data) => {
                 try {
-                    console.log(users);
-                    const socketId = await users.get(data.userIdReceived)
-                    await ChatController.sendMessage(io, data, socketId);   
+
+                    const socketIdReceived = await users.get(data.userIdReceived)
+                    const socketIdSent = await users.get(data.userIdSent)
+                    await ChatController.sendMessage(io, data, socketIdReceived, socketIdSent);
                 } catch (error) {
                     console.error(error);
                 }
